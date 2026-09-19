@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>WORKOUT LOG</title>
+
+<style>
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    background: #111;
+    color: #fff;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.container {
+    max-width: 600px;
+    margin: auto;
+    padding: 20px 16px 80px;
+}
+
+header {
+    margin-bottom: 25px;
+}
+
+.logo {
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: 2px;
+}
+
+.subtitle {
+    color: #888;
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+/* 部位選択 */
+
+.part-buttons {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-bottom: 20px;
+}
+
+.part-btn {
+    background: #222;
+    border: 1px solid #333;
+    color: #aaa;
+    padding: 12px 4px;
+    border-radius: 8px;
+    font-size: 12px;
+    cursor: pointer;
+}
+
+.part-btn.active {
+    background: #fff;
+    color: #111;
+    border-color: #fff;
+    font-weight: bold;
+}
+
+/* カード */
+
+.card {
+    background: #1b1b1b;
+    border: 1px solid #2b2b2b;
+    border-radius: 14px;
+    padding: 16px;
+    margin-bottom: 14px;
+}
+
+.card-title {
+    font-size: 17px;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+/* 入力 */
+
+label {
+    display: block;
+    color: #999;
+    font-size: 12px;
+    margin-bottom: 6px;
+}
+
+input,
+select {
+    width: 100%;
+    background: #111;
+    border: 1px solid #333;
+    color: white;
+    padding: 12px;
+    border-radius: 8px;
+    font-size: 16px;
+    outline: none;
+}
+
+input:focus,
+select:focus {
+    border-color: #777;
+}
+
+.input-group {
+    margin-bottom: 14px;
+}
+
+/* セット */
+
+.set-row {
+    display: grid;
+    grid-template-columns: 45px 1fr 1fr 40px;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.set-number {
+    color: #777;
+    font-size: 13px;
+}
+
+.remove-set {
+    background: #2a2a2a;
+    color: #aaa;
+    border: none;
+    border-radius: 7px;
+    height: 42px;
+    cursor: pointer;
+}
+
+.add-set {
+    width: 100%;
+    padding: 11px;
+    border: 1px dashed #444;
+    background: transparent;
+    color: #aaa;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 5px;
+}
+
+.save-btn {
+    width: 100%;
+    background: white;
+    color: #111;
+    border: none;
+    padding: 15px;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+/* 前回記録 */
+
+.previous {
+    background: #151515;
+    border-left: 3px solid #555;
+    padding: 10px 12px;
+    margin-top: 10px;
+    border-radius: 5px;
+    font-size: 13px;
+    color: #aaa;
+}
+
+.growth {
+    margin-top: 6px;
+    color: #fff;
+    font-weight: bold;
+}
+
+/* 履歴 */
+
+.history-item {
+    border-bottom: 1px solid #292929;
+    padding: 15px 0;
+}
+
+.history-item:last-child {
+    border-bottom: none;
+}
+
+.history-date {
+    color: #888;
+    font-size: 12px;
+}
+
+.history-part {
+    font-weight: bold;
+    margin: 4px 0 8px;
+}
+
+.exercise {
+    background: #222;
+    border-radius: 8px;
+    padding: 10px;
+    margin-top: 6px;
+}
+
+.exercise-name {
+    font-weight: bold;
+}
+
+.exercise-detail {
+    color: #aaa;
+    font-size: 13px;
+    margin-top: 5px;
+}
+
+/* 自己ベスト */
+
+.best {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #292929;
+}
+
+.best:last-child {
+    border-bottom: none;
+}
+
+.best-name {
+    color: #ccc;
+}
+
+.best-value {
+    font-weight: bold;
+}
+
+/* セクション */
+
+.section-title {
+    margin-top: 30px;
+    margin-bottom: 12px;
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* 新規種目 */
+
+.new-exercise {
+    margin-top: 8px;
+}
+
+.hidden {
+    display: none;
+}
+
+.empty {
+    color: #666;
+    text-align: center;
+    padding: 20px 0;
+    font-size: 13px;
+}
+
+@media (max-width: 400px) {
+    .part-buttons {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+    <div class="logo">WORKOUT LOG</div>
+    <div class="subtitle">TRAIN. RECORD. GROW.</div>
+</header>
+
+<!-- 部位 -->
+
+<div class="part-buttons">
+    <button class="part-btn active" data-part="胸">胸</button>
+    <button class="part-btn" data-part="背中">背中</button>
+    <button class="part-btn" data-part="肩">肩</button>
+    <button class="part-btn" data-part="腕">腕</button>
+    <button class="part-btn" data-part="脚">脚</button>
+</div>
+
+<!-- 記録入力 -->
+
+<div class="card">
+
+    <div class="card-title">
+        今日のトレーニング
+    </div>
+
+    <div class="input-group">
+        <label>日付</label>
+        <input type="date" id="date">
+    </div>
+
+    <div class="input-group">
+        <label>種目</label>
+
+        <select id="exerciseSelect">
+            <option value="">種目を選択</option>
+        </select>
+
+        <div class="new-exercise">
+            <input
+                type="text"
+                id="newExercise"
+                placeholder="新しい種目を入力"
+            >
+        </div>
+    </div>
+
+    <!-- 前回 -->
+
+    <div id="previousArea"></div>
+
+    <!-- セット -->
+
+    <div class="input-group">
+        <label>セット</label>
+
+        <div id="sets"></div>
+
+        <button class="add-set" onclick="addSet()">
+            ＋ セットを追加
+        </button>
+    </div>
+
+    <button class="save-btn" onclick="saveWorkout()">
+        トレーニングを記録する
+    </button>
+
+</div>
+
+
+<!-- 自己ベスト -->
+
+<div class="section-title">
+    自己ベスト
+</div>
+
+<div class="card" id="bestArea">
+    <div class="empty">
+        まだ記録がありません
+    </div>
+</div>
+
+
+<!-- 履歴 -->
+
+<div class="section-title">
+    トレーニング履歴
+</div>
+
+<div class="card" id="historyArea">
+    <div class="empty">
+        まだ記録がありません
+    </div>
+</div>
+
+</div>
+
+
+<script>
+
+let workouts =
+    JSON.parse(localStorage.getItem("workouts")) || [];
+
+let exercises =
+    JSON.parse(localStorage.getItem("exercises")) || {};
+
+let currentPart = "胸";
+
+let setCount = 0;
+
+
+/* =========================
+   初期設定
+========================= */
+
+document.getElementById("date").value =
+    new Date().toISOString().split("T")[0];
+
+document.querySelectorAll(".part-btn").forEach(button => {
+
+    button.addEventListener("click", () => {
+
+        document.querySelectorAll(".part-btn")
+            .forEach(btn => btn.classList.remove("active"));
+
+        button.classList.add("active");
+
+        currentPart =
+            button.dataset.part;
+
+        updateExerciseSelect();
+
+        document.getElementById("previousArea")
+            .innerHTML = "";
+
+    });
+
+});
+
+
+/* =========================
+   種目一覧
+========================= */
+
+function updateExerciseSelect() {
+
+    const select =
+        document.getElementById("exerciseSelect");
+
+    select.innerHTML =
+        '<option value="">種目を選択</option>';
+
+    const list =
+        exercises[currentPart] || [];
+
+    list.forEach(exercise => {
+
+        const option =
+            document.createElement("option");
+
+        option.value = exercise;
+        option.textContent = exercise;
+
+        select.appendChild(option);
+
+    });
+
+}
+
+
+document
+    .getElementById("exerciseSelect")
+    .addEventListener("change", function() {
+
+        if (this.value) {
+
+            document.getElementById("newExercise").value = "";
+
+            showPrevious(this.value);
+
+        }
+
+    });
+
+
+/* =========================
+   セット追加
+========================= */
+
+function addSet(weight = "", reps = "") {
+
+    setCount++;
+
+    const container =
+        document.getElementById("sets");
+
+    const row =
+        document.createElement("div");
+
+    row.className = "set-row";
+
+    row.innerHTML = `
+
+        <div class="set-number">
+            SET ${setCount}
+        </div>
+
+        <input
+            type="number"
+            class="weight"
+            placeholder="重量 kg"
+            value="${weight}"
+            step="0.5"
+        >
+
+        <input
+            type="number"
+            class="reps"
+            placeholder="回数"
+            value="${reps}"
+        >
+
+        <button
+            class="remove-set"
+            onclick="removeSet(this)"
+        >
+            ×
+        </button>
+
+    `;
+
+    container.appendChild(row);
+
+}
+
+
+function removeSet(button) {
+
+    button.parentElement.remove();
+
+}
+
+
+/* =========================
+   前回記録
+========================= */
+
+function getExerciseName() {
+
+    const select =
+        document.getElementById("exerciseSelect").value;
+
+    const newName =
+        document.getElementById("newExercise").value.trim();
+
+    return newName || select;
+
+}
+
+
+function getPreviousWorkout(exerciseName) {
+
+    const samePart =
+        workouts
+        .filter(workout =>
+            workout.part === currentPart &&
+            workout.exercises.some(
+                exercise => exercise.name === exerciseName
+            )
+        )
+        .sort(
+            (a,b) =>
+            new Date(b.date) - new Date(a.date)
+        );
+
+    return samePart[0];
+
+}
+
+
+function showPrevious(exerciseName) {
+
+    const area =
+        document.getElementById("previousArea");
+
+    const previous =
+        getPreviousWorkout(exerciseName);
+
+    if (!previous) {
+
+        area.innerHTML = `
+            <div class="previous">
+                この種目の前回記録はありません。
+            </div>
+        `;
+
+        return;
+    }
+
+    const exercise =
+        previous.exercises.find(
+            e => e.name === exerciseName
+        );
+
+    const bestSet =
+        exercise.sets.reduce(
+            (best, set) =>
+                Number(set.weight) > Number(best.weight)
+                ? set
+                : best,
+            exercise.sets[0]
+        );
+
+    area.innerHTML = `
+        <div class="previous">
+
+            前回の${currentPart}の日
+            <strong>${previous.date}</strong>
+
+            <br><br>
+
+            ${exercise.name}
+
+            <br>
+
+            最大重量：
+            <strong>
+                ${bestSet.weight}kg
+            </strong>
+
+            ／
+
+            ${bestSet.reps}回
+
+            <div class="growth">
+                今回の記録を入力すると
+                成長幅を表示します。
+            </div>
+
+        </div>
+    `;
+
+}
+
+
+/* =========================
+   新しい種目
+========================= */
+
+document
+    .getElementById("newExercise")
+    .addEventListener("input", function() {
+
+        if (this.value.trim()) {
+
+            document
+                .getElementById("exerciseSelect")
+                .value = "";
+
+            showPrevious(this.value.trim());
+
+        }
+
+    });
+
+
+/* =========================
+   保存
+========================= */
+
+function saveWorkout() {
+
+    const exerciseName =
+        getExerciseName();
+
+    if (!exerciseName) {
+
+        alert("種目を選択または入力してください。");
+
+        return;
+
+    }
+
+    const rows =
+        document.querySelectorAll(".set-row");
+
+    if (rows.length === 0) {
+
+        alert("セットを追加してください。");
+
+        return;
+
+    }
+
+    const sets = [];
+
+    rows.forEach(row => {
+
+        const weight =
+            row.querySelector(".weight").value;
+
+        const reps =
+            row.querySelector(".reps").value;
+
+        if (weight && reps) {
+
+            sets.push({
+                weight: Number(weight),
+                reps: Number(reps)
+            });
+
+        }
+
+    });
+
+    if (sets.length === 0) {
+
+        alert("重量と回数を入力してください。");
+
+        return;
+
+    }
+
+    /* 新しい種目なら登録 */
+
+    if (!exercises[currentPart]) {
+
+        exercises[currentPart] = [];
+
+    }
+
+    if (!exercises[currentPart]
+        .includes(exerciseName)) {
+
+        exercises[currentPart]
+            .push(exerciseName);
+
+    }
+
+    localStorage.setItem(
+        "exercises",
+        JSON.stringify(exercises)
+    );
+
+
+    const workout = {
+
+        id: Date.now(),
+
+        date:
+            document.getElementById("date").value,
+
+        part: currentPart,
+
+        exercises: [
+            {
+                name: exerciseName,
+                sets: sets
+            }
+        ]
+
+    };
+
+
+    workouts.push(workout);
+
+    localStorage.setItem(
+        "workouts",
+        JSON.stringify(workouts)
+    );
+
+
+    /* 成長確認 */
+
+    const previous =
+        getPreviousWorkout(exerciseName);
+
+    let message =
+        "トレーニングを記録しました！";
+
+    if (previous) {
+
+        const previousExercise =
+            previous.exercises.find(
+                e => e.name === exerciseName
+            );
+
+        const previousMax =
+            Math.max(
+                ...previousExercise.sets.map(
+                    set => Number(set.weight)
+                )
+            );
+
+        const currentMax =
+            Math.max(
+                ...sets.map(
+                    set => Number(set.weight)
+                )
+            );
+
+        const difference =
+            currentMax - previousMax;
+
+        if (difference > 0) {
+
+            message +=
+                `\n\n自己ベスト更新！ +${difference}kg`;
+
+        } else if (difference < 0) {
+
+            message +=
+                `\n\n前回より ${difference}kg`;
+
+        } else {
+
+            message +=
+                "\n\n重量は前回と同じです。";
+
+        }
+
+    }
+
+
+    alert(message);
+
+    resetForm();
+
+    updateExerciseSelect();
+
+    renderHistory();
+
+    renderBest();
+
+}
+
+
+/* =========================
+   フォームリセット
+========================= */
+
+function resetForm() {
+
+    document.getElementById("newExercise")
+        .value = "";
+
+    document.getElementById("exerciseSelect")
+        .value = "";
+
+    document.getElementById("sets")
+        .innerHTML = "";
+
+    document.getElementById("previousArea")
+        .innerHTML = "";
+
+    setCount = 0;
+
+    addSet();
+
+}
+
+
+/* =========================
+   履歴
+========================= */
+
+function renderHistory() {
+
+    const area =
+        document.getElementById("historyArea");
+
+    if (workouts.length === 0) {
+
+        area.innerHTML =
+            '<div class="empty">まだ記録がありません</div>';
+
+        return;
+
+    }
+
+    const sorted =
+        [...workouts].sort(
+            (a,b) =>
+            new Date(b.date) - new Date(a.date)
+        );
+
+    area.innerHTML = "";
+
+    sorted.forEach(workout => {
+
+        const item =
+            document.createElement("div");
+
+        item.className =
+            "history-item";
+
+        let html = `
+
+            <div class="history-date">
+                ${workout.date}
+            </div>
+
+            <div class="history-part">
+                ${workout.part}の日
+            </div>
+        `;
+
+        workout.exercises.forEach(exercise => {
+
+            const details =
+                exercise.sets
+                .map(
+                    set =>
+                    `${set.weight}kg × ${set.reps}回`
+                )
+                .join("<br>");
+
+            html += `
+
+                <div class="exercise">
+
+                    <div class="exercise-name">
+                        ${exercise.name}
+                    </div>
+
+                    <div class="exercise-detail">
+                        ${details}
+                    </div>
+
+                </div>
+
+            `;
+
+        });
+
+        item.innerHTML = html;
+
+        area.appendChild(item);
+
+    });
+
+}
+
+
+/* =========================
+   自己ベスト
+========================= */
+
+function renderBest() {
+
+    const area =
+        document.getElementById("bestArea");
+
+    const bests = {};
+
+    workouts.forEach(workout => {
+
+        workout.exercises.forEach(exercise => {
+
+            exercise.sets.forEach(set => {
+
+                const key =
+                    `${workout.part}_${exercise.name}`;
+
+                if (
+                    !bests[key] ||
+                    Number(set.weight) >
+                    bests[key].weight
+                ) {
+
+                    bests[key] = {
+
+                        part: workout.part,
+
+                        name: exercise.name,
+
+                        weight:
+                            Number(set.weight),
+
+                        reps:
+                            Number(set.reps)
+
+                    };
+
+                }
+
+            });
+
+        });
+
+    });
+
+
+    const values =
+        Object.values(bests);
+
+    if (values.length === 0) {
+
+        area.innerHTML =
+            '<div class="empty">まだ記録がありません</div>';
+
+        return;
+
+    }
+
+    area.innerHTML = "";
+
+    values.forEach(best => {
+
+        const row =
+            document.createElement("div");
+
+        row.className = "best";
+
+        row.innerHTML = `
+
+            <div class="best-name">
+
+                ${best.name}
+
+                <small style="color:#666">
+                    (${best.part})
+                </small>
+
+            </div>
+
+            <div class="best-value">
+
+                ${best.weight}kg ×
+                ${best.reps}回
+
+            </div>
+
+        `;
+
+        area.appendChild(row);
+
+    });
+
+}
+
+
+/* =========================
+   初期表示
+========================= */
+
+updateExerciseSelect();
+
+addSet();
+
+renderHistory();
+
+renderBest();
+
+</script>
+
+</body>
+</html>
